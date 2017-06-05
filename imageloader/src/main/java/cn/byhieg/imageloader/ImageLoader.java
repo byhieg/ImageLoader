@@ -18,28 +18,29 @@ import java.util.concurrent.Executors;
  */
 
 public class ImageLoader {
-    //图片缓存
-    LruCache<String,Bitmap> mImageCache;
+
     //线程池,线程数量为CPU数量
     ExecutorService mExecutorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
-    public ImageLoader(){
-        initImageCache();
-    }
+    ImageCache mImageCache = new MemoryCache();
 
-    private void initImageCache() {
-        final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
-        final int cacheSize = maxMemory / 4;
-        mImageCache = new LruCache<String, Bitmap>(cacheSize) {
-            @Override
-            protected int sizeOf(String key, Bitmap value) {
-                return value.getRowBytes() * value.getHeight() / 1024;
-            }
-        };
-
+    //注入缓存实现
+    public void setImageCache(ImageCache cache) {
+        mImageCache = cache;
     }
 
     public void displayImage(final String url, final ImageView imageView) {
+        Bitmap bitmap = mImageCache.get(url);
+        if (bitmap != null) {
+            imageView.setImageBitmap(bitmap);
+            return;
+        }
+
+        submitLoadRequest(url, imageView);
+
+    }
+
+    private void submitLoadRequest(final String url, final ImageView imageView) {
         imageView.setTag(url);
         mExecutorService.submit(new Runnable() {
             @Override
@@ -56,9 +57,10 @@ public class ImageLoader {
         });
     }
 
+
     public Bitmap downloadImage(String imageUrl) {
         Bitmap bitmap = null;
-        try{
+        try {
             URL url = new URL(imageUrl);
             final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             bitmap = BitmapFactory.decodeStream(conn.getInputStream());
