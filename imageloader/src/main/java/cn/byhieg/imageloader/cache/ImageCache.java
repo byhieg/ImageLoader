@@ -1,4 +1,4 @@
-package cn.byhieg.imageloader;
+package cn.byhieg.imageloader.cache;
 
 import android.graphics.Bitmap;
 

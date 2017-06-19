@@ -1,12 +1,10 @@
-package cn.byhieg.imageloader;
+package cn.byhieg.imageloader.cache;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
-import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 
 import cn.byhieg.imageloader.utils.CloseUtils;
 
